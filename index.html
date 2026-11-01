@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="app-build" content="v15.5.1-public-demo4">
+<meta name="app-build" content="v15.5.1-public-demo5">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Почта не спит</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -1472,7 +1472,7 @@ function showReport(re){
   sheetRender=()=>showReport(true);
   if(resetOK)document.getElementById("bNewR").onclick=()=>confirmFullReset();
   document.getElementById("bNext").onclick=()=>{ S.day++; startDay(); };
-  document.getElementById("bRe").onclick=()=>replayDay();
+  document.getElementById("bRe").onclick=()=>confirmReplayDay();
   if(!re){ renderShop(); showTab(S.coins>=cheapestAvailable()?"shop":"code"); }
 }
 // v15.3.7: completed trips, using the same counters as the stage-6 stamp.
@@ -1681,7 +1681,7 @@ function showEnd6(){
    <div class="row"><button class="btn" id="bRe6">Replay the mailbag stage</button>${nightBtn}<button class="btn ghost" id="bArch6">Open residents' letters</button><button class="btn ghost" id="bRestart6">Start the demo over</button></div>`));
   sheetRender=showEnd6;
   const nb=$("bNight"); if(nb)nb.onclick=enterNightMode;
-  $("bRe6").onclick=()=>replayDay();
+  $("bRe6").onclick=()=>confirmReplayDay();
   $("bArch6").onclick=()=>showTab("notes");
   $("bRestart6").onclick=()=>confirmFullReset();
 }
@@ -1926,7 +1926,7 @@ function showEnd7(){
   if(MODE==="night")return showNightEnd();
   showSheet((S.lastReport&&S.lastReport.day===7?reportTG(S.lastReport):"")+`<div class="row"><button class="btn" id="bRe7">${Lx("Повторить эксперимент: тот же поток","Repeat the experiment: the same flow")}</button><button class="btn ghost" id="bNotes7">${T("Записки")}</button><button class="btn ghost" id="bExit7">${Lx("Вернуться к кампании","Back to the campaign")}</button></div>`);
   sheetRender=showEnd7;
-  $("bRe7").onclick=()=>replayDay(); $("bNotes7").onclick=()=>showTab("notes"); $("bExit7").onclick=()=>$("qaExit").click();
+  $("bRe7").onclick=()=>confirmReplayDay(); $("bNotes7").onclick=()=>showTab("notes"); $("bExit7").onclick=()=>$("qaExit").click();
 }
 
 /* ===== v15.4.0: «Почтовая ночь» — отдельная смена после пройденного демо, отдельный слот сохранения ===== */
@@ -1968,7 +1968,7 @@ function showNightEnd(){
   showSheet((S.lastReport&&S.lastReport.day===7?reportTG(S.lastReport):"")+`<div class="row"><button class="btn" id="bReN">${Lx("Повторить ночь: те же письма","Repeat the night: the same letters")}</button><button class="btn ghost" id="bNotesN">${T("Записки")}</button><button class="btn ghost" id="bExitN">${Lx("Вернуться к завершённому демо","Back to the finished demo")}</button><button class="btn ghost" id="bResetN">${Lx("Сбросить ночь","Reset the night")}</button></div>`);
   sheetRender=showNightEnd;
   const ml=$("tgMarksLink"); if(ml)ml.onclick=e=>{ e.preventDefault(); showTab("stamps"); };
-  $("bReN").onclick=()=>replayDay(); $("bNotesN").onclick=()=>showTab("notes"); $("bExitN").onclick=()=>exitNight(true); $("bResetN").onclick=()=>confirmFullReset();
+  $("bReN").onclick=()=>confirmReplayDay(); $("bNotesN").onclick=()=>showTab("notes"); $("bExitN").onclick=()=>exitNight(true); $("bResetN").onclick=()=>confirmFullReset();
 }
 // Полный новый старт: убрать устаревшие временные элементы интерфейса прошлого состояния (альбом, звук, сохранения не трогаются)
 function resetTransientUI(){
@@ -1992,7 +1992,7 @@ function showEnd(){ S.finished=true; save();
    ${replayLine}<div class="row report-actions">${replayBudget}<button class="btn" id="bStage6">To the final task: mailbags →</button><button class="btn ghost" id="bFree"${replayDesc}>Replay shift 5</button><button class="btn ghost" id="bRestart">Start the demo over</button></div>`));
   sheetRender=()=>{ S.finished=true; showEnd(); };
   document.getElementById("bStage6").onclick=()=>enterStage6();
-  document.getElementById("bFree").onclick=()=>replayDay();
+  document.getElementById("bFree").onclick=()=>confirmReplayDay();
   if(!S.snap){ const b=document.getElementById("bFree"); b.disabled=true; b.title=Lx("В этом сохранении нет данных о начале смены 5","This save has no data on the start of shift 5"); }
   document.getElementById("bRestart").onclick=()=>confirmFullReset();
 }
@@ -2028,6 +2028,8 @@ function buy(id){ if(LS.active||tg())return;
   if(id==="shelfBig"){ S.shelfCap=20; }
   if(id==="shards"){ if(S.robots.length<3)makeRobot(); reshard(); addNote("Начальник","Теперь лотков три. Без номера take() берёт из лотка с номером робота. Хочешь иначе — take(1), take(2), take(3). size(n) скажет, сколько писем в лотке n.",true); }
   renderAll(); save();
+  // A purchase changes the replay budget, including while an end-of-shift report is open.
+  if(S.phase==="report"&&sheetRender&&!$("overlay").hidden)sheetRender();
   if(id==="robot1"&&S.lessonState==="offered")lessonPrompt(false);
 }
 function reshard(){
@@ -2786,12 +2788,14 @@ function confirmReplayDay(){
   if(LS.active){ toast("Сначала закончи или закрой проверку робота."); return; }
   if($("confirmBox")||!["day","closing","paused","report"].includes(S.phase))return;
   if(replayStartCoins()===null){ toast("В этом сохранении нет данных о начале смены — повтор станет доступен со следующей смены."); return; }
+  const returnFocus=document.activeElement;
   const before={phase:S.phase,prev:S.prev,pauseReason:S.pauseReason}, pausedHere=S.phase==="day"||S.phase==="closing";
   if(pausedHere)pauseGame("confirm");
   const box=document.createElement("div"); box.className="confirm"; box.id="confirmBox"; box.dataset.action="replay";
   box.innerHTML=`<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="cfH">${confirmInner("replay")}</div>`;
   document.body.appendChild(box);
-  const cancel=()=>{ box.remove(); if(pausedHere){ resumeGame(); S.prev=before.prev; S.pauseReason=before.pauseReason; } $("bReplay").focus(); };
+  const cancel=()=>{ box.remove(); if(pausedHere){ resumeGame(); S.prev=before.prev; S.pauseReason=before.pauseReason; }
+    const target=(returnFocus&&returnFocus.isConnected?returnFocus:returnFocus&&returnFocus.id?$(returnFocus.id):null)||$("bReplay"); if(target)target.focus(); };
   $("cfNo").onclick=cancel;
   $("cfYes").onclick=()=>{ box.remove(); Object.assign(S,before); replayDay(); };
   box.addEventListener("keydown",e=>{ if(e.key==="Escape"){ e.preventDefault(); cancel(); }

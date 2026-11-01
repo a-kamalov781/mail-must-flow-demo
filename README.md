@@ -28,7 +28,7 @@
 
 Ссылки открываются в новой вкладке. Для отправки нужен аккаунт выбранной площадки; отзывы публичные. По желанию можно скопировать версию и несколько сведений о текущем прохождении. Они не отправляются автоматически. После открытия отзыва активная смена остаётся на паузе — продолжите её кнопкой «Дальше».
 
-В первой смене увеличение лотка открывается после первого робота, чтобы не потратить нужные для него 40 монет. Перед повтором смены игра показывает стартовый бюджет: заработок попытки сбросится, а покупки и код сохранятся. Доход разных повторов не складывается.
+В первой смене увеличение лотка открывается после первого робота, чтобы не потратить нужные для него 40 монет. Перед повтором смены игра показывает стартовый бюджет: заработок попытки сбросится, а покупки и код сохранятся. Доход разных повторов не складывается. Если купить улучшение из итогового экрана, сумма для повтора обновится сразу. Подтверждение работает и у кнопки повтора в отчёте; отмена сохраняет текущую попытку.
 
 ## English
 
@@ -44,10 +44,10 @@ For a first playtest, try 10–15 minutes. Tell us how far you got, where you fi
 
 Use **Leave feedback** below the game or in a shift report to open the **[DTF comments](https://dtf.ru/indie/5387999-pochta-ne-spit-roboty-i-avtomatizatsiya)** or the **[GitHub feedback form](https://github.com/a-kamalov781/mail-must-flow-demo/issues/new?template=playtest.yml)**. Links open in a new tab; posting requires an account on the chosen site, and feedback is public. English feedback is welcome. You can optionally copy the game version and current state for a bug report. These details are not sent automatically. Opening feedback pauses an active shift; use Resume when you are ready to continue.
 
-In shift 1, the tray upgrade unlocks after your first robot, so you can save the 40 coins it needs. Before replaying, the game shows the starting budget: earnings from this attempt reset, while purchases and code are kept. Earnings from separate replays do not add up.
+In shift 1, the tray upgrade unlocks after your first robot, so you can save the 40 coins it needs. Before replaying, the game shows the starting budget: earnings from this attempt reset, while purchases and code are kept. Earnings from separate replays do not add up. Buying an upgrade from a shift report immediately updates its replay budget. Report replay buttons also ask for confirmation; Cancel keeps the current result.
 
 ## О сборке / Build
 
-- Version: `v15.5.1-public-demo4`.
+- Version: `v15.5.1-public-demo5`.
 - The game is contained in `index.html`; no external assets or build step are required. `.nojekyll` keeps GitHub Pages from applying Jekyll processing.
 - Код создавался и редактировался с помощью ИИ. / The code was created and edited with AI assistance.
