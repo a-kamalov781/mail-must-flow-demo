@@ -8,6 +8,8 @@
 - Интерфейс на русском и английском: переключатель **RU / EN** находится сверху.
 - Прогресс сохраняется **в конце каждой смены** в текущем браузере. Чтобы продолжить, откройте игру в том же браузере.
 - Это ранняя демоверсия для обратной связи.
+- Сортировка — двумя отдельными нажатиями: письмо, затем ящик с той же меткой. Перетаскивать не нужно.
+- В первой смене нет штрафов за потерянные письма; каждая доставка приносит 1 монету. Штрафы за потери начинаются со второй смены.
 
 ## Первый игровой тест: 10–15 минут
 
@@ -29,10 +31,12 @@ Mail Must Flow is a game about automating a small post office. Sort letters by h
 
 Progress is saved **at the end of each shift**, locally in the current browser. Use the same browser to continue.
 
+Manual sorting uses two separate clicks: envelope, then the bin with the same mark. No dragging is needed. Shift 1 has no fines for lost letters; each delivery still earns 1 coin. Loss fines begin in shift 2.
+
 For a first playtest, try 10–15 minutes. Tell us how far you got, where you first felt unsure, and whether you wanted to keep playing. Finishing the demo is optional. **[Feedback and bug reports](https://github.com/a-kamalov781/mail-must-flow-demo/issues)** require a GitHub account and are public; English feedback is welcome.
 
 ## О сборке / Build
 
-- Version: `v15.5.0-public-demo2`.
+- Version: `v15.5.1-public-demo3`.
 - The game is contained in `index.html`; no external assets or build step are required. `.nojekyll` keeps GitHub Pages from applying Jekyll processing.
 - Код создавался и редактировался с помощью ИИ. / The code was created and edited with AI assistance.

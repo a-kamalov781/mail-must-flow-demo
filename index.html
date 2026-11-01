@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="app-build" content="v15.5.0-public-demo2">
+<meta name="app-build" content="v15.5.1-public-demo3">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Почта не спит</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -509,7 +509,7 @@ const EN={
  "куплено":"owned","Новые товары появляются по мере покупок.":"New items appear as you buy.",
  // холст
  "ЛОТОК ВХОДЯЩИХ":"INCOMING TRAY","РАЙОН":"DISTRICT","ошибка в коде":"error in code","жду: лоток занят":"waiting: tray busy","скучаю: мой лоток пуст":"idle: my tray is empty",
- "нажми на письмо, потом на ящик того же цвета":"click a letter, then the bin of the same colour","не тот район":"wrong district",
+ "письмо → ящик: два нажатия, без перетаскивания":"letter → bin: two clicks, no dragging","не тот район":"wrong district",
  "жду письмо":"waiting for a letter","беру":"taking","ищу в справочнике":"looking up","кладу":"putting","запуск":"starting","ошибка":"error","стоит":"stopped",
  "смотрю полку":"checking shelf","беру с полки":"reading shelf","ставлю на полку":"writing shelf","ждёт запуска":"waiting to start","письмо вернулось":"letter returned","программа не запущена":"program not started",
  "мимо! вернулось":"miss! returned","вернули отправителю!":"returned to sender!","с полки!":"from shelf!","нет на полке":"not on shelf",
@@ -830,6 +830,7 @@ const BOSS={
 };
 // Новые вступления хранятся по-русски; прежние BOSS и переводы остаются для архива.
 const BOSS_PROGRESS={
+ training:["Первая смена — осваивайся спокойно. Нажми на письмо, затем на ящик с той же меткой: перетаскивать не нужно. За доставку получишь 1 монету, за потерянные письма в этой смене денег не снимаем. Копи 40 монет на первого робота.","Take your time learning in the first shift. Click a letter, then the bin with the same mark: no dragging needed. Each delivery earns 1 coin; lost letters carry no fine in this shift. Save 40 coins for your first robot."],
  robotWorking:["Робот уже на месте, а писем становится больше. Посмотри, где он задерживается и успевает ли разбирать очередь.","The robot is already in place, and more letters are arriving. Watch where it slows down and whether it keeps up with the queue."],
  shelfReady:["Полка уже стоит. Посмотри на письма с повторными адресами: робот берёт район с полки или снова ищет в справочнике?","The shelf is already installed. Watch letters for repeated addresses: does the robot get the district from the shelf or look it up again?"],
  sharedTray:["У общего лотка один выход. С несколькими роботами посмотри, не ждут ли они друг друга.","The shared tray has one exit. With several robots, watch whether they have to wait for each other."],
@@ -844,6 +845,7 @@ for(const [ru,en] of [[BOSS[2],EN[BOSS[2]]],BOSS_PROGRESS.sharedTray,BOSS_PROGRE
  EN[ru+" "+move[0]+" "+shelf[0]]=en+" "+move[1]+" "+shelf[1];
 }
 function bossNote(day,own={}){
+ if(day===1)return BOSS_PROGRESS.training[0];
  const hasRobot=!!(own.robot1||own.robot2||own.shards);
  if(day===2&&hasRobot)return BOSS_PROGRESS.robotWorking[0];
  if(day===3){
@@ -1221,7 +1223,7 @@ function spawnLetter(st){
   S.queues[s].push(L); S.letters.push(L);
 }
 function addTrail(x,y,L){ const r=inboxRect(L.s); (S.trails=S.trails||[]).push({x1:x,y1:y,x2:r.x+r.w-14,y2:r.y+14,t0:S.t}); if(S.trails.length>8)S.trails.shift(); }
-function fine(n){ S.coins-=n; S.dayStats.fines+=n; }
+function fine(n){ if(S.day===1)return; S.coins-=n; S.dayStats.fines+=n; }
 function lose(L,s){ if(L&&L.tg)S.dayStats.tgLost++; S.lost++; S.dayStats.lost++; fine(2); const p=inboxRect(s); S.flash.push({x:p.x+p.w-14,y:p.y+p.h/2,t:0.6}); beep(140,0.08,"sawtooth",0.05); shake=0.25; }
 function returnToQueue(L){ L.st="queue"; L.robot=null; S.queues[L.s].unshift(L); }
 function misdeliver(L){ L.st="queue"; const q=S.queues[L.s]; if(q.length>=capPerQueue()){ lose(L,L.s); L.st="gone"; } else q.push(L); }
@@ -1338,7 +1340,7 @@ function replayDay(){
 }
 function endDay(){
   S.phase="report"; refreshCodeMsg(); renderFinish6(); const d=S.dayStats;
-  // Граница смены: всё, что не доставлено (в лотках и в руках роботов), — потеря по общему правилу (−2).
+  // Всё, что не доставлено к закрытию, считается потерей; fine() освобождает первую смену от штрафов.
   let left=0;
   for(const q of S.queues){ for(const L of q){ left++; S.lost++; d.lost++; fine(2); if(L.tg)d.tgLost++; } }
   for(const R of S.robots){ if(R.carry){ left++; S.lost++; d.lost++; fine(2); if(R.carry.tg)d.tgLost++; R.carry=null; } }
@@ -1364,7 +1366,7 @@ function endDay(){
   if(S.day>=DAYS){ showEnd(); return; }
   showReport();
 }
-/* ===== v14: путь к первому роботу (цены, штрафы, потоки, звёзды не меняются) ===== */
+/* ===== Путь к первому роботу: первая смена без штрафов за потерянные письма ===== */
 const robotPrice=()=>SHOP.find(i=>i.id==="robot1").price;
 const mon=v=>v<0?"−"+Math.abs(v):String(v);
 const LETTERS_DAY={1:56,2:105}; // фактическое число писем смен 1–2 (поток детерминирован)
@@ -1373,14 +1375,15 @@ function robotGoalHTML(where){ const p=robotPrice(), c=S.coins;
   if(c>=p)return Lx(`<b>Хватает на первого робота: ${p} монет, сейчас ${mon(c)}.</b> Купить можно прямо сейчас — даже во время смены: покупка поставит смену на паузу. Зарядка робота — 10 монет — спишется в конце смены, копить её заранее не нужно.`,
       `<b>Enough for the first robot: ${p} coins, you have ${mon(c)}.</b> You can buy it right now — even during a shift: buying pauses the shift. The robot's charging fee — 10 coins — is taken at the end of the shift; no need to save up for it in advance.`)
     +(where==="code"?`<div><button class="btn" id="bGoShop">${Lx("Открыть магазин","Open shop")}</button></div>`:"");
-  return Lx(`<b>Цель — первый робот: ${p} монет.</b> Сейчас ${mon(c)} — осталось ${p-c}. Монеты: +1 за доставленное письмо, −2 за потерянное. Робота можно купить прямо во время смены: покупка поставит её на паузу. Зарядка робота — 10 монет — спишется только в конце смены.`,
-    `<b>Goal — the first robot: ${p} coins.</b> You have ${mon(c)} — ${p-c} to go. Coins: +1 per delivered letter, −2 per lost one. You can buy the robot right during a shift: buying pauses it. The robot's charging fee — 10 coins — is taken only at the end of the shift.`); }
+  const moneyRule=S.day===1?Lx("+1 за доставленное письмо. В первой смене штрафов за потерю нет — заработок остаётся у тебя.","+1 per delivered letter. No loss fines in shift 1 — you keep what you earn."):Lx("+1 за доставленное письмо, −2 за потерянное.","+1 per delivered letter, −2 per lost one.");
+  return Lx(`<b>Цель — первый робот: ${p} монет.</b> Сейчас ${mon(c)} — осталось ${p-c}. Монеты: ${moneyRule} Робота можно купить прямо во время смены: покупка поставит её на паузу. Зарядка робота — 10 монет — спишется только в конце смены.`,
+    `<b>Goal — the first robot: ${p} coins.</b> You have ${mon(c)} — ${p-c} to go. Coins: ${moneyRule} You can buy the robot right during a shift: buying pauses it. The robot's charging fee — 10 coins — is taken only at the end of the shift.`); }
 let robotGoalKey=null;
 function updateRobotGoal(){ const el=$("robotGoal"); if(!el)return; const on=needRobotGoal(), can=on&&S.coins>=robotPrice();
   $("t-shop").classList.toggle("want",can);
   const cm=$("codeMsg"); if(cm)cm.hidden=on;   // до покупки вместо общей подсказки редактора — текущая цель
   if(!on){ el.hidden=true; robotGoalKey=null; return; }
-  const key=LANG+S.coins; if(key===robotGoalKey&&!el.hidden)return; robotGoalKey=key;
+  const key=LANG+":"+S.day+":"+S.coins; if(key===robotGoalKey&&!el.hidden)return; robotGoalKey=key;
   el.hidden=false; el.innerHTML=robotGoalHTML("code"); const b=$("bGoShop"); if(b)b.onclick=()=>showTab("shop"); }
 // Повтор: с чего он начнётся по штатной контрольной точке смены (монеты начала минус покупки этой смены)
 function replayStartCoins(){ return (S.snap&&S.snap.day===S.day)?S.snap.coins-(S.spent||0):null; }
@@ -1469,7 +1472,7 @@ function reportHTML(d){
     <tr><td>${Lx("Потеряно","Lost")}${d.left?Lx(` (из них не успели к закрытию: ${d.left})`,` (not done by closing: ${d.left})`):""}</td><td>${d.lost}</td></tr>
     ${d.day===6?`<tr><td>${Lx("Отправок мешков (писем в них)","Mailbags sent (letters in them)")}</td><td>${d.sends} (${d.bagLetters})</td></tr><tr><td>${Lx("Одиночных рейсов","Single trips")}</td><td>${d.singles}</td></tr><tr><td>${Lx("Осталось в мешках к закрытию","Left in mailbags at closing")}${d.rareLost?Lx(" (вкл. письмо в Дальнюю)"," (incl. the letter to Дальняя (Dalnyaya))"):""}</td><td>${d.inBags||0}</td></tr><tr><td>${Lx("Письмо Петра: от поступления до доставки","Pyotr's letter: arrival to delivery")}</td><td>${rareDeliveryText(d.rareDeliverySec)}</td></tr>`:""}
     <tr><td>${Lx("Заработано за письма","Earned for letters")}</td><td>+${d.coins}</td></tr>
-    <tr><td>${Lx(`Штрафы: ${d.lost} потерь × 2`,`Fines: ${d.lost} lost × 2`)}</td><td>−${d.fines}</td></tr><tr><td>${Lx(`Зарядка роботов (${d.nR} × 10)`,`Robot charging (${d.nR} × 10)`)}</td><td>−${d.upkeep}</td></tr>
+    <tr><td>${d.day===1&&d.fines===0?Lx("Потери в первой смене — без штрафа","Lost letters in shift 1 — no fine"):Lx(`Штрафы: ${d.lost} потерь × 2`,`Fines: ${d.lost} lost × 2`)}</td><td>${d.fines?"−"+d.fines:"0"}</td></tr><tr><td>${Lx(`Зарядка роботов (${d.nR} × 10)`,`Robot charging (${d.nR} × 10)`)}</td><td>−${d.upkeep}</td></tr>
     ${d.bonus?`<tr><td>${Lx("Премия за три звезды","Three-star bonus")}</td><td>+${d.bonus}</td></tr>`:""}<tr><td>${Lx("Итого за смену","Shift total")}</td><td>${sg(d.net)}${mn}</td></tr>
     <tr><td>${Lx("Баланс после смены","Balance after shift")}</td><td>${mon(d.balance)}${mn}</td></tr></table>
     <p>${comp}</p>${cmp}${rareDeliveryComparison(d)}`;
@@ -2163,7 +2166,7 @@ function draw(){ if(LS.active){ drawLesson(); return; }
     if(R.fx&&R.fx.t>0){ ctx.globalAlpha=Math.min(1,R.fx.t*2); ctx.font="600 12px 'IBM Plex Sans', sans-serif"; ctx.fillStyle=R.fx.c; ctx.fillText(trLabel(R.fx.txt),R.x-16,R.y-26-(0.8-R.fx.t)*20); ctx.globalAlpha=1; R.fx.t-=1/60; }
   }
   if(!S.robots.length){ ctx.fillStyle="#6b7488"; ctx.font="600 12px 'IBM Plex Sans', sans-serif"; ctx.textAlign="center";
-    ctx.fillText(T("нажми на письмо, потом на ящик того же цвета"),450,H-22); ctx.textAlign="left"; }
+    ctx.fillText(T("письмо → ящик: два нажатия, без перетаскивания"),450,H-22); ctx.textAlign="left"; }
   // letters
   for(const L of S.letters){
     if(L.st==="bag")continue;                                   // письма в мешке показывает сам мешок (наполнение, N/12)
@@ -2240,7 +2243,7 @@ function renderShop(){
 function renderHelp(){ if(LANG==="en")return renderHelpEN(); return renderHelpRU(); }
 function renderHelpEN(){
   const n=v=>String(v);
-  let h=`<p style="color:var(--paper)">Money: delivery +1, loss −2, robot charging −10 per shift, three stars +20.</p><h3>take()</h3><p>Take a letter from the tray. If the tray is empty, the robot waits.</p>
+  let h=`<p style="color:var(--paper)">Money: delivery +1. Shift 1 has no loss fines; from shift 2, each loss costs 2 coins. Robot charging −10 per shift, three stars +20.</p><h3>take()</h3><p>Take a letter from the tray. If the tray is empty, the robot waits.</p>
   <h3>lookup(address)</h3><p>Find the address's district in the directory (1, 2 or 3). Slow: ${n(S.lookupCost)} s.</p>
   <h3>put(letter, district)</h3><p>Put the letter into the district bin. Returns True if the district is right. Wrong district — the letter goes back to the tray and put() returns False. A letter returned three times is sent back to the sender — that's a loss.</p>
   <h3>letter.addr</h3><p>The letter's address, e.g. “Садовая, 7”. letter.street — just the street.</p>
@@ -2264,7 +2267,7 @@ function renderHelpEN(){
   $("p-help").innerHTML=h;
 }
 function renderHelpRU(){
-  let h=`<p style="color:var(--paper)">Деньги: доставка +1, потеря −2, зарядка робота −10 за смену, три звезды +20.</p><h3>take()</h3><p>Взять письмо из лотка. Если лоток пуст — робот ждёт.</p>
+  let h=`<p style="color:var(--paper)">Деньги: доставка +1. В первой смене потери без штрафа; со второй — −2 за потерянное письмо. Зарядка робота −10 за смену, три звезды +20.</p><h3>take()</h3><p>Взять письмо из лотка. Если лоток пуст — робот ждёт.</p>
   <h3>lookup(адрес)</h3><p>Найти район адреса в справочнике (1, 2 или 3). Долго: ${S.lookupCost} с.</p>
   <h3>put(письмо, район)</h3><p>Положить письмо в ящик района. Вернёт True, если район верный. Не тот район — письмо вернётся в лоток и put() вернёт False. Трижды вернувшееся письмо отправят назад отправителю — это потеря.</p>
   <h3>letter.addr</h3><p>Адрес письма, например «Садовая, 7». letter.street — только улица.</p>
@@ -2688,7 +2691,7 @@ function confirmFullReset(){
 }
 function povertyHint(){
   if(S.own.robot1||S.day>=5||S.coins>=40)return "";
-  return `<p class="hintline">Первый робот стоит 40 монет, сейчас ${S.coins}. Можно переиграть смену — придут те же письма, и с меньшими потерями денег станет больше.</p>`;
+  return `<p class="hintline">Первый робот стоит 40 монет, сейчас ${S.coins}. Можно переиграть смену — придут те же письма. Чем больше доставишь, тем больше заработаешь.</p>`;
 }
 
 /* ================= QA scenarios (служебно) ================= */
@@ -2785,13 +2788,15 @@ function welcomeBack(midShift){
 function intro(){
   showSheet(Lx(`<span class="stamp">Ночная смена</span><h2>Почта не спит</h2>
   <p>Сортируй письма, программируй роботов и помогай растущему городу получать почту.</p>
-  <p>Конверты прилетают в лоток слева. На каждом — метка района: цвет и форма (круг, квадрат или треугольник). Нажми на конверт, потом на ящик с той же меткой справа.</p>
+  <p>Конверты прилетают в лоток слева. На каждом — метка района: цвет и форма (круг, квадрат или треугольник). Нажми на конверт, потом на ящик с той же меткой справа. <b>Два отдельных нажатия — перетаскивать не нужно.</b></p>
+  <p><b>Первая смена без штрафов за потерянные письма.</b> Каждая доставка приносит 1 монету — копи на первого робота за 40 монет.</p>
   <p>Город растёт с каждой сменой, писем всё больше. Скоро руками будет не успеть — тогда пригодятся роботы и немного кода.</p>
   <p>В демо пять городских смен и заключительное задание в пригородном филиале — с мешками.</p>
   <div class="row"><button class="btn" id="bStart">Начать смену 1</button></div>`,
   `<span class="stamp">Night shift</span><h2>Mail Must Flow</h2>
   <p>Sort letters, program robots and help a growing town get its mail.</p>
-  <p>Envelopes arrive in the tray on the left. Each has a district mark: a colour and a shape (circle, square or triangle). Click an envelope, then the bin with the same mark on the right.</p>
+  <p>Envelopes arrive in the tray on the left. Each has a district mark: a colour and a shape (circle, square or triangle). Click an envelope, then the bin with the same mark on the right. <b>Two separate clicks — no dragging needed.</b></p>
+  <p><b>No fines for lost letters in shift 1.</b> Each delivery earns 1 coin — save up for your first robot at 40 coins.</p>
   <p>The town grows every shift and there are more and more letters. Soon you won't keep up by hand — that's when robots and a bit of code come in.</p>
   <p>The demo has five town shifts and a final task at a suburban branch — with mailbags.</p>
   <div class="row"><button class="btn" id="bStart">Start shift 1</button></div>`));
