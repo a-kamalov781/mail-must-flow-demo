@@ -1,0 +1,44 @@
+name: Первый игровой тест
+description: Расскажите, как прошли первые 10–15 минут в «Почта не спит».
+title: "[Первый тест] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Спасибо, что попробовали демо! Достаточно нескольких предложений; проходить игру до конца не нужно.
+        Отзыв будет публичным. Можно отвечать по-русски или по-английски.
+  - type: dropdown
+    id: progress
+    attributes:
+      label: До какого момента вы дошли?
+      options:
+        - Не удалось начать игру
+        - Сортировал письма вручную
+        - Купил первого робота
+        - Написал или изменил программу робота
+        - Прошёл дальше
+    validations:
+      required: true
+  - type: textarea
+    id: impressions
+    attributes:
+      label: Что было непонятно и хочется ли продолжать?
+      description: Если всё было понятно, так и напишите. Расскажите, где впервые застряли и что повлияло на желание продолжить или остановиться.
+      placeholder: Несколько предложений о вашем первом впечатлении.
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Если что-то сломалось
+      description: Необязательно. Что вы сделали, чего ожидали и что произошло вместо этого?
+    validations:
+      required: false
+  - type: input
+    id: environment
+    attributes:
+      label: Браузер и операционная система
+      description: Необязательно. Поможет разобраться, если возникла ошибка.
+      placeholder: Например, Firefox на Windows.
+    validations:
+      required: false
