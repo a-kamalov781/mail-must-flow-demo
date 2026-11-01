@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="app-build" content="v15.5.1-public-demo3">
+<meta name="app-build" content="v15.5.1-public-demo4">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Почта не спит</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -180,6 +180,20 @@ textarea#code:disabled{color:var(--dim)}
 .save-status p{margin:8px 0;color:var(--muted)}
 .save-status .row{margin-top:8px}
 .save-error{color:var(--bad)}
+.feedback-box{position:fixed;inset:0;z-index:60;background:#12151ce8;display:flex;align-items:center;justify-content:center;padding:16px}
+.feedback-card{box-sizing:border-box;width:min(100%,460px);max-height:calc(100vh - 32px);overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;color:var(--paper)}
+.feedback-card h2{margin:0 0 8px;font-size:20px}
+.feedback-card p{margin:0 0 12px}
+.feedback-links{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.feedback-links a{display:inline-block;text-decoration:none}
+.feedback-links a:focus-visible{outline:2px solid var(--post);outline-offset:2px}
+.feedback-card .feedback-note{font-size:12px;color:var(--muted);margin:14px 0}
+.feedback-card label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px}
+.feedback-card textarea{box-sizing:border-box;width:100%;min-height:132px;resize:vertical;border:1px solid var(--line);border-radius:6px;background:var(--ink);color:var(--paper);padding:8px;font:12px/1.4 var(--f-code)}
+.feedback-card .msg{margin:6px 0}
+.feedback-invite{margin:10px 0 0;font-size:12px}
+.sheet .feedback-invite .linkbtn{color:#5c553f}
+.foot #bFeedback{margin-left:8px}
 
 /* Public demo: developer scenarios are not part of the player interface. */
 #qaToggle, #qaPanel, #qaLbl { display: none !important; }
@@ -266,7 +280,7 @@ textarea#code:disabled{color:var(--dim)}
       <div class="pane" id="p-stamps" hidden></div>
     </aside>
   </div>
-  <div class="foot"><span id="saveFoot">Демо. Автосохранение — в конце каждой смены.</span> <button class="linkbtn" id="qaToggle">Проверочный сценарий</button></div>
+  <div class="foot"><span id="saveFoot">Демо. Автосохранение — в конце каждой смены.</span> <button class="linkbtn" id="bFeedback" data-i18n>Оставить отзыв</button> <button class="linkbtn" id="qaToggle">Проверочный сценарий</button></div>
   <section class="qa" id="qaPanel" hidden aria-label="Проверочный сценарий">
     <h3>Проверочный сценарий <span>служебный инструмент, не часть игры</span></h3>
     <p>Запускает смену с заданными условиями. Правила, симуляция, сохранение и повтор — те же, что в кампании. Результаты помечены «Проверочный прогон» и сохраняются отдельно; кампания не затрагивается.</p>
@@ -280,6 +294,23 @@ textarea#code:disabled{color:var(--dim)}
       <button class="sbtn" id="qaExit">Вернуться к кампании</button>
     </div>
     <div class="msg" id="qaMsg"></div>
+  </section>
+</div>
+
+<div class="feedback-box" id="feedbackBox" hidden>
+  <section class="feedback-card" role="dialog" aria-modal="true" aria-labelledby="feedbackHeading" aria-describedby="feedbackPrompt">
+    <h2 id="feedbackHeading" data-i18n>Как прошла игра?</h2>
+    <p id="feedbackPrompt" data-i18n>До какого момента дошли и где впервые стало непонятно? Достаточно пары предложений.</p>
+    <div class="feedback-links">
+      <a class="sbtn" id="feedbackDtf" href="https://dtf.ru/indie/5387999-pochta-ne-spit-roboty-i-avtomatizatsiya" target="_blank" rel="noopener noreferrer" data-i18n>Написать на DTF</a>
+      <a class="sbtn" href="https://github.com/a-kamalov781/mail-must-flow-demo/issues/new?template=playtest.yml" target="_blank" rel="noopener noreferrer" data-i18n>Сообщить об ошибке · GitHub</a>
+    </div>
+    <button class="sbtn" id="feedbackCopy" data-i18n>Скопировать данные прохождения</button>
+    <label id="feedbackDetailsLabel" for="feedbackDetails" hidden data-i18n>Данные прохождения</label>
+    <textarea id="feedbackDetails" readonly hidden spellcheck="false"></textarea>
+    <p class="msg" id="feedbackStatus" role="status" aria-live="polite" hidden></p>
+    <p class="feedback-note" data-i18n>Ссылки откроются в новой вкладке. Для отправки нужен аккаунт выбранной площадки; отзывы публичные. Данные прохождения никуда не отправляются автоматически.</p>
+    <button class="sbtn" id="feedbackClose" data-i18n>Вернуться к игре</button>
   </section>
 </div>
 
@@ -472,6 +503,15 @@ const EN={
  "Проверить программу":"Check program","Вернуть пример":"Reset to example","Проверить робота на служебных конвертах":"Check the robot on test envelopes",
  "Демо. Прогресс сохраняется в этом браузере в конце каждой смены.":"Demo. Progress is saved in this browser at the end of each shift.",
  "Проверочный сценарий":"QA scenario",
+ "Оставить отзыв":"Leave feedback",
+ "Как прошла игра?":"How was the game?",
+ "До какого момента дошли и где впервые стало непонятно? Достаточно пары предложений.":"How far did you get, and where did you first feel unsure? A couple of sentences is enough.",
+ "Написать на DTF":"Leave feedback · DTF",
+ "Сообщить об ошибке · GitHub":"Report a problem · GitHub",
+ "Скопировать данные прохождения":"Copy game details",
+ "Данные прохождения":"Game details",
+ "Ссылки откроются в новой вкладке. Для отправки нужен аккаунт выбранной площадки; отзывы публичные. Данные прохождения никуда не отправляются автоматически.":"Links open in a new tab. Posting requires an account on the chosen site; feedback is public. Game details are not sent automatically.",
+ "Вернуться к игре":"Back to the game",
  "Сортировочный зал: лоток с письмами слева, роботы в центре, ящики районов справа":"Sorting room: letter tray on the left, robots in the middle, district bins on the right",
  // сообщения редактора
  "Пока правишь код, игра на паузе. Ctrl+Enter — запустить. Все роботы выполняют одну программу. Выполнение программы тоже занимает время — подробности в «Справке».":"While you edit code, the game is paused. Ctrl+Enter runs it. All robots run the same program. Running a program takes time too — see “Help”.",
@@ -1389,12 +1429,22 @@ function updateRobotGoal(){ const el=$("robotGoal"); if(!el)return; const on=nee
 function replayStartCoins(){ return (S.snap&&S.snap.day===S.day)?S.snap.coins-(S.spent||0):null; }
 function noRobotAdvice(){
   if(S.own.robot1||S.day>=5||tg())return {html:"",rec:false};
-  const p=robotPrice(), c=S.coins, r=replayStartCoins(), rec=c<0&&r!==null&&r>=0; let h="";
+  const p=robotPrice(), c=S.coins, r=replayStartCoins(), training=S.day===1&&c<p, rec=(c<0||training)&&r!==null&&r>=0; let h="";
+  if(training){
+    h+=`<p class="hintline">`+Lx(`<b>До первого робота не хватает ${p-c} ${p-c===1?"монеты":"монет"}</b> (нужно ${p}, сейчас ${mon(c)}). ${rec?"Рекомендуем ещё раз пройти первую смену: потери писем здесь не штрафуются.":"В первой смене потери писем не штрафуются."} Доход попыток не складывается: при повторе заработок этой попытки сбросится.`,
+      `<b>${p-c} ${p-c===1?"coin":"coins"} to go before your first robot</b> (price ${p}, you have ${mon(c)}). ${rec?"We recommend another try at shift 1: lost letters carry no fine here.":"Lost letters carry no fine in shift 1."} Earnings from different attempts do not add up: replaying resets what you earned in this attempt.`)+`</p>`;
+    if(r!==null&&r<0)h+=`<p class="hintline">`+Lx(`<b>Учти: повтор начнётся с ${mon(r)} монет — в долг.</b> Уже купленные улучшения сохранятся, их стоимость вычитается из стартового бюджета.`,
+      `<b>Be aware: the replay starts with ${mon(r)} coins — in debt.</b> Upgrades you already bought are kept, and their cost is subtracted from the starting budget.`)+`</p>`;
+    if(r===null)h+=`<p class="hintline">`+Lx("В этом сохранении нет данных о начале смены, поэтому повтор пока недоступен.","This save has no data from the start of the shift, so replay is not available yet.")+`</p>`;
+    h+=`<p class="hintline">`+Lx(`<b>Смена 2 сложнее:</b> ${LETTERS_DAY[2]} писем вместо ${LETTERS_DAY[1]}, штраф −2 за потерянное письмо, а робота пока нет. Можно продолжить с текущими ${mon(c)} монетами${r!==null?" или потренироваться в первой смене":""}.`,
+      `<b>Shift 2 is harder:</b> ${LETTERS_DAY[2]} letters instead of ${LETTERS_DAY[1]}, a 2-coin fine per lost letter, and no robot yet. You can continue with your current ${mon(c)} coins${r!==null?" or practise shift 1":""}.`)+`</p>`;
+    return {html:h,rec,training};
+  }
   if(c<p)h+=`<p class="hintline">`+Lx(`<b>До первого робота не хватает ${p-c} ${p-c===1?"монеты":"монет"}</b> (цена ${p}, сейчас ${mon(c)}). Купить его можно и по ходу следующей смены — как только монет станет ${p}; смена встанет на паузу.${LETTERS_DAY[S.day+1]&&LETTERS_DAY[S.day]?" В смене "+(S.day+1)+" писем будет "+LETTERS_DAY[S.day+1]+" вместо "+LETTERS_DAY[S.day]+".":""}`,
       `<b>${p-c} ${p-c===1?"coin":"coins"} short of the first robot</b> (price ${p}, you have ${mon(c)}). You can also buy it during the next shift — as soon as you reach ${p} coins; the shift will pause.${LETTERS_DAY[S.day+1]&&LETTERS_DAY[S.day]?" Shift "+(S.day+1)+" brings "+LETTERS_DAY[S.day+1]+" letters instead of "+LETTERS_DAY[S.day]+".":""}`)+`</p>`;
   else h+=`<p class="hintline">`+Lx(`<b>Хватает на первого робота</b> (${p} монет, сейчас ${mon(c)}). Купи его в «Магазине» до начала смены или по ходу. Зарядка 10 монет спишется в конце смены.`,
       `<b>Enough for the first robot</b> (${p} coins, you have ${mon(c)}). Buy it in the “Shop” before the shift or during it. The 10-coin charging fee is taken at the end of the shift.`)+`</p>`;
-  return {html:h,rec};
+  return {html:h,rec,training};
 }
 // v14.1: бюджет повтора — в каждом обычном отчёте смены, с роботом и без
 function replayLineHTML(rec){ const r=replayStartCoins(); if(r===null||tg())return "";
@@ -1415,7 +1465,7 @@ function showReport(re){
   const d=S.lastReport;
   const adv=noRobotAdvice(), resetOK=!S.own.robot1&&S.day>=2;
   const replayBudget=replayBudgetHTML(adv.rec), replayDesc=replayBudget?' aria-describedby="replayBudget"':"";
-  const bNext=`<button class="btn${adv.rec?" ghost":""}" id="bNext">${Lx("Начать смену "+(S.day+1),"Start shift "+(S.day+1))}</button>`, bRe=`<button class="btn${adv.rec?"":" ghost"}" id="bRe"${replayDesc}>${Lx("Переиграть смену "+S.day,"Replay shift "+S.day)}</button>`;
+  const bNext=`<button class="btn${adv.rec?" ghost":""}" id="bNext">${adv.training?Lx("Начать смену 2 со штрафами","Start shift 2 with fines"):Lx("Начать смену "+(S.day+1),"Start shift "+(S.day+1))}</button>`, bRe=`<button class="btn${adv.rec?"":" ghost"}" id="bRe"${replayDesc}${replayStartCoins()===null?" disabled":""}>${adv.training?Lx("Повторить смену 1 без штрафов","Replay shift 1 without fines"):Lx("Переиграть смену "+S.day,"Replay shift "+S.day)}</button>`;
   const nArch=S.archive.filter(a=>a.day===S.day).length;
   showSheet(reportHTML(d)+adv.html+replayLineHTML(adv.rec)+`<p>${Lx("Перед следующей сменой загляни в магазин и в код — время стоит.","Before the next shift, check the shop and the code — time is stopped.")}${nArch?Lx(" В «Записках» новые письма жителей: "+nArch+"."," New residents' letters in “Notes”: "+nArch+"."):""}</p>
     <div class="row report-actions">${replayBudget}${adv.rec?bRe+bNext:bNext+bRe}${resetOK?`<button class="btn ghost" id="bNewR">${Lx("Начать демо заново","Start the demo over")}</button>`:""}</div>`);
@@ -1948,9 +1998,10 @@ function showEnd(){ S.finished=true; save();
 }
 
 /* ================= Shop ================= */
+function firstShiftTrayLocked(){ return S.day===1&&!S.own.robot1; }
 const SHOP=[
  {id:"robot1",name:"Робот-сортировщик",price:40,desc:"Сортирует сам по программе. Открывает редактор кода.",req:()=>true},
- {id:"cap",name:"Лоток побольше",price:30,desc:"+8 мест в лотке. Меньше писем сгорит в час пик.",req:()=>true,rep:3},
+ {id:"cap",name:"Лоток побольше",price:30,desc:"+8 мест в лотке. Меньше писем сгорит в час пик.",req:()=>!firstShiftTrayLocked(),rep:3},
  {id:"shelf",name:"Полка популярных адресов",price:60,desc:"Запоминай районы частых адресов: с полки в 25 раз быстрее, чем из справочника. 8 мест.",req:()=>owned("robot1")},
  {id:"lookup",name:"Новый справочник",price:90,desc:"lookup() в 1,6 раза быстрее.",req:()=>owned("robot1")},
  {id:"shelfBig",name:"Полка шире",price:70,desc:"Полка вмещает 20 адресов вместо 8.",req:()=>owned("shelf")},
@@ -2234,9 +2285,10 @@ function esc(s){ return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",
 function renderShop(){
   if(tg()){ $("p-shop").innerHTML='<div class="msg">'+(MODE==="night"?Lx("Ночью магазина нет: оборудование фиксировано.","There is no shop at night: the equipment is fixed."):Lx("В эксперименте магазина нет: оборудование фиксировано.","There is no shop in the experiment: the equipment is fixed."))+'</div>'; return; }
   const goal=needRobotGoal()?`<div class="goalrobot">${robotGoalHTML("shop")}</div>`:"";
-  const items=SHOP.filter(i=>avail(i)||owned(i));
-  $("p-shop").innerHTML=goal+items.map(i=>{ const o=owned(i), p=price(i);
-    return `<div class="item${o?" owned":""}"><h3>${T(i.name)}${i.rep&&S.own[i.id]?" · "+S.own[i.id]+"/"+i.rep:""}</h3><button class="buy" data-id="${i.id}" ${o||S.coins<p?"disabled":""}>${o?T("куплено"):p+Lx(" мон."," coins")}</button><p>${T(i.desc)}</p></div>`; }).join("")
+  const items=SHOP.filter(i=>avail(i)||owned(i)||(i.id==="cap"&&firstShiftTrayLocked()&&(S.own.cap||0)<i.rep));
+  $("p-shop").innerHTML=goal+items.map(i=>{ const o=owned(i), p=price(i), locked=i.id==="cap"&&firstShiftTrayLocked();
+    const hint=locked?Lx("В первой смене сначала купи робота за 40 монет. Лоток станет доступен после него.","In shift 1, buy your first robot for 40 coins first. The tray upgrade unlocks after that."):T(i.desc);
+    return `<div class="item${o?" owned":""}"><h3>${T(i.name)}${i.rep&&S.own[i.id]?" · "+S.own[i.id]+"/"+i.rep:""}</h3><button class="buy" data-id="${i.id}" ${locked||o||S.coins<p?"disabled":""}>${locked?Lx("После робота","After the robot"):o?T("куплено"):p+Lx(" мон."," coins")}</button><p>${hint}</p></div>`; }).join("")
     +'<div class="msg">'+T("Новые товары появляются по мере покупок.")+'</div>';
   $("p-shop").querySelectorAll(".buy").forEach(b=>b.onclick=()=>buy(b.dataset.id));
 }
@@ -2324,8 +2376,68 @@ function updateHeader(){
 }
 function renderCityCode(){ const b=$("cityCodeBox"); if(!b)return; const on=!!(S.cityCode&&S.day===6); b.hidden=!on; if(on)$("cityCodePre").textContent=S.cityCode; }
 function renderAll(){ updateRobotGoal(); renderCityCode(); $("bReopen").hidden=!(S.own.robot1&&S.lessonState==="skipped"&&!LS.active&&S.day<6); renderShop(); renderHelp(); renderNotes(); renderRobots(); renderTabs(); updateHeader(); $("t-stamps").hidden=!stampsTabOn(); renderStamps(); updateGoalsStrip(); }
-function showSheet(html){ sheetRender=null; $("sheet").innerHTML=html; $("overlay").hidden=false; $("sheet").scrollTop=0; }
+function showSheet(html){
+  sheetRender=null;
+  const feedback=S.phase==="report"?`<p class="feedback-invite"><button class="linkbtn" id="bReportFeedback">${Lx("Оставить отзыв","Leave feedback")}</button></p>`:"";
+  $("sheet").innerHTML=html+feedback; $("overlay").hidden=false; $("sheet").scrollTop=0;
+  const b=$("bReportFeedback"); if(b)b.onclick=openFeedback;
+}
 function hideOverlay(){ $("overlay").hidden=true; sheetRender=null; }
+
+/* Feedback is optional. Opening it never replaces the current game sheet or sends game data. */
+let feedbackReturnFocus=null, feedbackRequest=0;
+function openFeedback(){
+  if($("confirmBox")){ const cancel=$("cfNo"); if(cancel)cancel.focus(); return; }
+  if(!$("feedbackBox").hidden)return;
+  feedbackReturnFocus=document.activeElement; feedbackRequest++;
+  pauseGame("user");
+  if(LS.active&&LS.status==="running"){ LS.status="paused"; lessonUI(); }
+  $("feedbackDetails").value=""; $("feedbackDetails").hidden=true; $("feedbackDetailsLabel").hidden=true;
+  $("feedbackStatus").textContent=""; $("feedbackStatus").hidden=true; $("feedbackCopy").disabled=false;
+  $("feedbackBox").hidden=false; $("feedbackDtf").focus();
+}
+function closeFeedback(){
+  $("feedbackBox").hidden=true; feedbackRequest++;
+  $("feedbackDetails").value=""; $("feedbackDetails").hidden=true; $("feedbackDetailsLabel").hidden=true;
+  const target=feedbackReturnFocus&&feedbackReturnFocus.isConnected?feedbackReturnFocus:$("bFeedback");
+  if(target)target.focus(); feedbackReturnFocus=null;
+  // Keep both the shift and the robot check paused; the player's Resume action is explicit.
+}
+function feedbackDetailsText(){
+  const build=document.querySelector('meta[name="app-build"]');
+  const phase=S.phase==="paused"?`paused (${S.prev||"unknown"}; ${S.pauseReason||"user"})`:S.phase;
+  const lesson=LS.active?LS.status:(S.lessonState||"not started");
+  const lines=[`Mail Must Flow — ${build?build.content:"unknown build"}`,`Language: ${LANG}; mode: ${MODE}`,
+    `Shift: ${S.day}; phase: ${phase}; robots: ${S.robots.length}`,`Robot check: ${lesson}`];
+  const d=S.phase==="report"&&S.lastReport&&S.lastReport.day===S.day?S.lastReport:S.dayStats;
+  const count=v=>Number.isFinite(v)?String(v):"unknown";
+  if(d)lines.push(`Current shift: arrived ${count(d.inn)}; delivered ${count(d.del)}; lost ${count(d.lost)}`);
+  lines.push(`Coins: ${count(S.coins)}`); return lines.join("\n");
+}
+async function copyFeedbackDetails(){
+  const request=++feedbackRequest, text=feedbackDetailsText(), field=$("feedbackDetails"), status=$("feedbackStatus");
+  field.value=text; field.hidden=false; $("feedbackDetailsLabel").hidden=false;
+  status.hidden=true; $("feedbackCopy").disabled=true;
+  let copied=false;
+  try{ if(navigator.clipboard&&typeof navigator.clipboard.writeText==="function"){ await navigator.clipboard.writeText(text); copied=true; } }catch(e){}
+  if(request!==feedbackRequest||$("feedbackBox").hidden)return;
+  $("feedbackCopy").disabled=false; status.hidden=false;
+  status.textContent=copied?Lx("Данные скопированы. При желании добавьте их к отзыву.","Details copied. You can add them to your feedback."):
+    Lx("Не удалось скопировать автоматически. Выделите и скопируйте показанный текст.","Couldn’t copy automatically. Select and copy the displayed text.");
+  if(!copied){ field.focus(); field.select(); }
+}
+$("bFeedback").onclick=openFeedback;
+$("feedbackClose").onclick=closeFeedback;
+$("feedbackCopy").onclick=copyFeedbackDetails;
+$("feedbackBox").addEventListener("click",e=>{ if(e.target===$("feedbackBox"))closeFeedback(); });
+$("feedbackBox").addEventListener("keydown",e=>{
+  if(e.key==="Escape"){ e.preventDefault(); e.stopPropagation(); closeFeedback(); return; }
+  if(e.key!=="Tab")return;
+  const items=Array.from($("feedbackBox").querySelectorAll('a[href],button:not(:disabled),textarea:not([hidden])')).filter(el=>!el.hidden);
+  const first=items[0], last=items[items.length-1];
+  if(e.shiftKey&&document.activeElement===first){ e.preventDefault(); last.focus(); }
+  else if(!e.shiftKey&&document.activeElement===last){ e.preventDefault(); first.focus(); }
+});
 
 $("bFinish6").onclick=()=>{ if(canFinishShift6(S,LS.active))endDay(); };
 $("bApply").onclick=()=>applyCode();
@@ -2367,7 +2479,7 @@ function refreshCodeMsg(){ const m=$("codeMsg"); if(!m||m.className!=="msg ok"||
   else if(S.phase==="report"){ m.textContent=T("Смена закрыта. Код готов — роботы продолжат по нему в следующей попытке."); } }
 function resumeGame(){ if(S.phase==="paused"){ S.phase=S.prev; S.pauseReason=null; refreshCodeMsg(); $("bPause").textContent=T("Пауза"); renderStepBtn(); renderFinish6(); } }
 $("bPause").onclick=()=>{ if(LS.active){ if(LS.status==="running"){LS.status="paused";} else if(LS.status==="paused"){LS.status="running";} lessonUI(); return; } if(S.phase==="paused")resumeGame(); else pauseGame("user"); };
-$("bReplay").onclick=()=>{ if(LS.active){ toast("Сначала закончи или закрой проверку робота."); return; } if(["day","closing","paused","report"].includes(S.phase))replayDay(); };
+$("bReplay").onclick=()=>confirmReplayDay();
 $("code").addEventListener("focus",()=>{ if(LS.active){ if(LS.status==="running"){ LS.status="paused"; lessonUI(); } return; } pauseGame("edit"); });
 $("bStep").onclick=()=>stepSelected();
 $("bGood").onclick=()=>{ if(S.goodCode){ $("code").value=S.goodCode; applyCode();
@@ -2662,7 +2774,31 @@ function drawLesson(){
 }
 
 /* ================= Полный сброс с подтверждением ================= */
-function confirmInner(){ const qa=MODE==="qa";
+function replayConfirmInner(){
+  const r=replayStartCoins(), start=S.snap.coins, spent=S.spent||0, robots=S.robots.length;
+  const title=S.day===7?(MODE==="night"?Lx("Переиграть почтовую ночь?","Replay the night shift?"):Lx("Переиграть эксперимент?","Replay the experiment?")):S.day===6?Lx("Переиграть задание филиала?","Replay the branch task?"):Lx("Переиграть смену "+S.day+"?","Replay shift "+S.day+"?");
+  return `<h2 id="cfH">${title}</h2><p>`+Lx(`Сейчас у тебя ${mon(S.coins)} монет. <b>Повтор начнётся с ${mon(r)} монет${r<0?" — в долг":""}.</b>`,
+    `You have ${mon(S.coins)} coins now. <b>The replay starts with ${mon(r)} coins${r<0?" — in debt":""}.</b>`)+`</p><p>`+Lx(`Бюджет начала смены ${mon(start)} − покупки ${spent} = ${mon(r)}. Заработок этой попытки сбросится; доход разных повторов не складывается.`,
+    `Starting budget ${mon(start)} − purchases ${spent} = ${mon(r)}. What you earned in this attempt will be reset; earnings from separate replays do not add up.`)+`</p><p>`+Lx(`Роботы (${robots}), купленные улучшения и твой код сохранятся. Придут те же письма.`,
+    `Your robots (${robots}), purchased upgrades and code are kept. The same letters will arrive.`)+`</p><div class="row"><button class="btn" id="cfNo">${Lx("Отмена","Cancel")}</button><button class="btn ghost" id="cfYes">${Lx("Переиграть с "+mon(r)+" мон.","Replay with "+mon(r)+" coins")}</button></div>`;
+}
+function confirmReplayDay(){
+  if(LS.active){ toast("Сначала закончи или закрой проверку робота."); return; }
+  if($("confirmBox")||!["day","closing","paused","report"].includes(S.phase))return;
+  if(replayStartCoins()===null){ toast("В этом сохранении нет данных о начале смены — повтор станет доступен со следующей смены."); return; }
+  const before={phase:S.phase,prev:S.prev,pauseReason:S.pauseReason}, pausedHere=S.phase==="day"||S.phase==="closing";
+  if(pausedHere)pauseGame("confirm");
+  const box=document.createElement("div"); box.className="confirm"; box.id="confirmBox"; box.dataset.action="replay";
+  box.innerHTML=`<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="cfH">${confirmInner("replay")}</div>`;
+  document.body.appendChild(box);
+  const cancel=()=>{ box.remove(); if(pausedHere){ resumeGame(); S.prev=before.prev; S.pauseReason=before.pauseReason; } $("bReplay").focus(); };
+  $("cfNo").onclick=cancel;
+  $("cfYes").onclick=()=>{ box.remove(); Object.assign(S,before); replayDay(); };
+  box.addEventListener("keydown",e=>{ if(e.key==="Escape"){ e.preventDefault(); cancel(); }
+    else if(e.key==="Tab"){ e.preventDefault(); (document.activeElement===$("cfNo")?$("cfYes"):$("cfNo")).focus(); } });
+  $("cfNo").focus();
+}
+function confirmInner(action){ if(action==="replay")return replayConfirmInner(); const qa=MODE==="qa";
   if(MODE==="night")return Lx(`<h2 id="cfH">Сбросить почтовую ночь?</h2>
    <p>Будут удалены результаты, программа, архив телеграмм и собранные отметки почтовой ночи. Демо, его код, архив и альбом марок не затрагиваются.</p>
    <p>После сброса — введение и новая ночь со стартовой программой.</p>
@@ -2770,7 +2906,7 @@ function setLang(l){
   applyStaticLang(); setClockLabels(); robotGoalKey=null; renderAll(); updateModeUI();
   if(LS.active)lessonUI();
   if(sheetRender&&!$("overlay").hidden)sheetRender();
-  const cf=$("confirmBox"); if(cf){ const sh=cf.querySelector(".sheet"); const yes=$("cfYes").onclick, no=$("cfNo").onclick; sh.innerHTML=confirmInner(); $("cfYes").onclick=yes; $("cfNo").onclick=no; }
+  const cf=$("confirmBox"); if(cf){ const sh=cf.querySelector(".sheet"); const yes=$("cfYes").onclick, no=$("cfNo").onclick; sh.innerHTML=confirmInner(cf.dataset.action); $("cfYes").onclick=yes; $("cfNo").onclick=no; $("cfNo").focus(); }
   renderStorageNotice();
 }
 $("bLang").onclick=()=>setLang(LANG==="en"?"ru":"en");
