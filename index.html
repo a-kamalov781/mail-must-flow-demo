@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="app-build" content="v15.5.1-public-demo5">
+<meta name="app-build" content="v15.5.1-public-demo6">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Почта не спит</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -39,6 +39,16 @@ header{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px}
 .coins .k{color:var(--post-ink)}
 .ctl{display:flex;gap:6px}
 .ctl button{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:5px 10px}
+.desktop-entry{min-width:0;background:var(--desk);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:13px}
+.desktop-entry-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px}
+.desktop-entry-copy{flex:1 1 440px;min-width:0}
+.desktop-entry p{margin:0}
+.desktop-entry-copy p+p{margin-top:3px;color:var(--muted)}
+.desktop-entry button{max-width:100%;min-height:44px;white-space:normal;overflow-wrap:anywhere}
+.desktop-entry-status:not(:empty),#desktopLinkFallback{margin-top:8px}
+.desktop-entry label{display:block;margin-bottom:4px;color:var(--muted)}
+.desktop-entry input{box-sizing:border-box;display:block;width:100%;min-width:0;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--ink);color:var(--paper);font:12px/1.4 var(--f-code)}
+.desktop-entry input:focus-visible{outline:2px solid var(--post);outline-offset:2px}
 .main{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:12px;align-items:start}
 @media (max-width:900px){.main{grid-template-columns:minmax(0,1fr)}}
 .stage{position:relative;background:var(--desk);border:1px solid var(--line);border-radius:10px;overflow:hidden}
@@ -237,6 +247,20 @@ textarea#code:disabled{color:var(--dim)}
     <span id="nightText" role="status"></span>
     <button class="sbtn" id="bNightExit"></button>
   </div>
+  <section class="desktop-entry" aria-labelledby="desktopEntryTitle">
+    <div class="desktop-entry-row">
+      <div class="desktop-entry-copy">
+        <p><strong id="desktopEntryTitle" data-i18n>Демо рассчитано на компьютер с клавиатурой и мышью или тачпадом.</strong></p>
+        <p data-i18n>Открыли с телефона? Скопируйте ссылку и откройте игру на компьютере.</p>
+      </div>
+      <button class="sbtn" id="bCopyDesktopLink" type="button" data-i18n>Скопировать ссылку для компьютера</button>
+    </div>
+    <p class="desktop-entry-status" id="desktopLinkStatus" role="status" aria-live="polite" aria-atomic="true" data-i18n></p>
+    <div id="desktopLinkFallback" hidden>
+      <label for="desktopLinkField" data-i18n>Ссылка на игру</label>
+      <input id="desktopLinkField" type="url" readonly spellcheck="false" autocomplete="off">
+    </div>
+  </section>
   <div class="main">
     <div class="stage" id="stage">
       <canvas id="cv" width="760" height="440" aria-label="Сортировочный зал: лоток с письмами слева, роботы в центре, ящики районов справа"></canvas>
@@ -413,6 +437,20 @@ function normalizeLegacySnapshotDay(d) {
   return {...d, snap:{...snap, day:d.day}};
 }
 
+// Older branch saves kept town purchase flags after resetting the equipment.
+// Derive ownership from the effective equipment; leave money, code and raw saves alone.
+function normalizeBranchEquipment(d) {
+  if(d===null || typeof d!=="object" || Array.isArray(d) || d.day!==6)return d;
+  const fix=x=>({...x, own:{...(x.own||{}), robot1:true, shelf:true, robot2:true, shards:true,
+    cap:Math.max(0,Math.floor((x.capBonus||0)/8)),
+    lookup:(x.lookupCost||0.8)<0.8, shelfBig:(x.shelfCap||8)>=20}});
+  const out=fix(d);
+  // The intro may still carry the town snapshot. Only repair a branch snapshot,
+  // using its own equipment rather than upgrades bought later in this attempt.
+  if(d.snap&&d.snap.day===6)out.snap=fix(d.snap);
+  return out;
+}
+
 function validSaveRecord(d) {
   d=normalizeLegacySnapshotDay(d);
   const obj = x => x!==null && typeof x==="object" && !Array.isArray(x);
@@ -512,6 +550,12 @@ const EN={
  "Данные прохождения":"Game details",
  "Ссылки откроются в новой вкладке. Для отправки нужен аккаунт выбранной площадки; отзывы публичные. Данные прохождения никуда не отправляются автоматически.":"Links open in a new tab. Posting requires an account on the chosen site; feedback is public. Game details are not sent automatically.",
  "Вернуться к игре":"Back to the game",
+ "Демо рассчитано на компьютер с клавиатурой и мышью или тачпадом.":"This demo is designed for a computer with a keyboard and a mouse or trackpad.",
+ "Открыли с телефона? Скопируйте ссылку и откройте игру на компьютере.":"Opened this on your phone? Copy the link and open the game on a computer.",
+ "Скопировать ссылку для компьютера":"Copy link for a computer",
+ "Ссылка на игру":"Game link",
+ "Ссылка скопирована. Откройте её на компьютере.":"Link copied. Open it on a computer.",
+ "Не удалось скопировать автоматически. Выделите и скопируйте ссылку ниже.":"Couldn’t copy automatically. Select and copy the link below.",
  "Сортировочный зал: лоток с письмами слева, роботы в центре, ящики районов справа":"Sorting room: letter tray on the left, robots in the middle, district bins on the right",
  // сообщения редактора
  "Пока правишь код, игра на паузе. Ctrl+Enter — запустить. Все роботы выполняют одну программу. Выполнение программы тоже занимает время — подробности в «Справке».":"While you edit code, the game is paused. Ctrl+Enter runs it. All robots run the same program. Running a program takes time too — see “Help”.",
@@ -1618,11 +1662,11 @@ function prestartUI6(){
 function stage6Intro(btn){
   if(LANG==="en")return `<span class="stamp">Final task</span><h2>Branch: mailbags</h2>
   <p>At the suburban branch the districts are far away: every delivery is a robot trip, <b>1.2 s plus 0.08 s per letter</b>. While a robot is on a trip, it's busy. So it pays to carry letters in mailbags: put them into the district mailbag and send it in one trip.</p>
-  <p><b>The branch has its own ready equipment:</b> 3 robots, 3 trays of 9 letters (by street), an empty shelf for 8 addresses, directory 0.8 s. Town office upgrades don't apply here. Money, overall results and residents' letters come with you; prices and fines are as in town.</p>
+  <p><b>The branch has its own ready equipment:</b> 3 robots, 3 trays of 9 letters (by street), an empty shelf for 8 addresses, directory 0.8 s. Town office upgrades don't apply here. Branch upgrades can be bought separately in the shop. Money, overall results and residents' letters come with you; prices and fines are as in town.</p>
   <p>Shift: warm-up → fan-mail surge → lull → no incoming. The new example in the editor sends a mailbag when it has 8 letters (it holds 12).${S.cityCode?" Your town post office program is saved: “Code” tab, “Town post office code” block.":""}</p>`+(btn||"")+goalsHTML();
   return `<span class="stamp">Заключительное задание</span><h2>Филиал: мешки</h2>
   <p>В пригородном филиале районы далеко: каждая доставка — рейс робота, <b>1,2 с плюс 0,08 с на каждое письмо</b>. Пока робот в рейсе, он занят. Поэтому письма выгодно возить мешками: клади их в мешок района и отправляй одним рейсом.</p>
-  <p><b>Оборудование филиала своё, готовое:</b> 3 робота, 3 лотка по 9 писем (по улицам), пустая полка на 8 адресов, справочник 0,8 с. Улучшения городского отделения здесь не действуют. Деньги, общие результаты и письма жителей переходят с тобой; цены и штрафы — как в городе.</p>
+  <p><b>Оборудование филиала своё, готовое:</b> 3 робота, 3 лотка по 9 писем (по улицам), пустая полка на 8 адресов, справочник 0,8 с. Улучшения городского отделения здесь не действуют. Улучшения для филиала можно купить отдельно в магазине. Деньги, общие результаты и письма жителей переходят с тобой; цены и штрафы — как в городе.</p>
   <p>Смена: знакомство → наплыв фанатской почты → затишье → входящих нет. Новый пример в редакторе отправляет мешок, когда в нём наберётся 8 писем (вмещает 12).${S.cityCode?" Твоя программа городской почты сохранена: вкладка «Код», блок «Код городской почты».":""}</p>`+(btn||"")+goalsHTML();
 }
 const BAG_STARTER_EN=`# Stage 6. Letters collect in the district mailbag,
@@ -1659,7 +1703,7 @@ while True:
 `;
 function setupStage6(){
   if(S.day>=1&&S.day<=5&&typeof S.code==="string"&&S.code)S.cityCode=S.code;
-  S.day=6; S.finished6=false; S.own=Object.assign({},S.own,{robot1:true,shelf:true,robot2:true,shards:true});
+  S.day=6; S.finished6=false; S.own={robot1:true,shelf:true,robot2:true,shards:true};
   S.capBonus=0; S.lookupCost=0.8; S.shelfCap=8; S.shelf=new Map(); S.moved={}; buildAddresses();
   S.queues=[[],[],[]]; S.locks=[0,0,0]; S.robots=[]; for(let i=0;i<3;i++)makeRobot();
   const bs=LANG==="en"?BAG_STARTER_EN:BAG_STARTER; S.code=bs; S.goodCode=bs; setCode(bs);
@@ -2386,6 +2430,22 @@ function showSheet(html){
 }
 function hideOverlay(){ $("overlay").hidden=true; sheetRender=null; }
 
+/* Copy the public game link only; game state and saves are not transferred or changed. */
+const DESKTOP_PLAY_URL="https://a-kamalov781.github.io/mail-must-flow-demo/";
+async function copyDesktopLink(){
+  const button=$("bCopyDesktopLink"), field=$("desktopLinkField"), status=$("desktopLinkStatus");
+  if(button.disabled)return;
+  button.disabled=true;
+  let copied=false;
+  try{ if(navigator.clipboard&&typeof navigator.clipboard.writeText==="function"){ await navigator.clipboard.writeText(DESKTOP_PLAY_URL); copied=true; } }catch(e){}
+  button.disabled=false; field.value=DESKTOP_PLAY_URL;
+  $("desktopLinkFallback").hidden=copied;
+  status.dataset.ru=copied?"Ссылка скопирована. Откройте её на компьютере.":"Не удалось скопировать автоматически. Выделите и скопируйте ссылку ниже.";
+  status.textContent=T(status.dataset.ru);
+  if(!copied&&document.activeElement===button){ field.focus(); field.select(); }
+}
+$("bCopyDesktopLink").onclick=copyDesktopLink;
+
 /* Feedback is optional. Opening it never replaces the current game sheet or sends game data. */
 let feedbackReturnFocus=null, feedbackRequest=0;
 function openFeedback(){
@@ -2506,7 +2566,7 @@ const SAVE_KEY="pochta-ne-spit-v1", SAVE_KEY_QA="pochta-ne-spit-qa-v1", SAVE_KEY
 let MODE=(()=>{ const m=STORE.readText(MODE_KEY).value; return m==="qa"?"qa":m==="night"?"night":"campaign"; })();
 const curKey=()=>MODE==="qa"?SAVE_KEY_QA:MODE==="night"?SAVE_KEY_NIGHT:SAVE_KEY;
 function save(){ return STORE.writeJSON(curKey(),{day:S.day,coins:S.coins,own:S.own,capBonus:S.capBonus,lookupCost:S.lookupCost,shelfCap:S.shelfCap,record:S.record,code:S.code,goodCode:S.goodCode,archive:S.archive.slice(0,40),lost:S.lost,delivered:S.delivered,notes:S.notes.slice(0,20),phase:S.phase,finished:!!S.finished,moved:S.moved,snap:S.snap,spent:S.spent||0,attempts:S.attempts||{},lastReport:S.lastReport||null,finished6:!!S.finished6,lessonState:S.lessonState||null,lessonDraft:S.lessonDraft||null,lessonVerified:S.lessonVerified||null,cityCode:S.cityCode||null,nightMarks:S.nightMarks||null},validSaveRecord).ok; }
-function load(){ const r=STORE.readJSON(curKey(),validSaveRecord); return r.ok?normalizeLegacySnapshotDay(r.value):null; }
+function load(){ const r=STORE.readJSON(curKey(),validSaveRecord); return r.ok?normalizeBranchEquipment(normalizeLegacySnapshotDay(r.value)):null; }
 
 // SAVE_STORAGE_UI_BEGIN
 /* v15.3 candidate: status copy has no raw saved data or exception details. */
@@ -2586,6 +2646,7 @@ function prepareQAScenario() {
 $("bSaveRetry").onclick=retryCurrentSaving;
 $("bSaveNew").onclick=()=>confirmFullReset();
 function restore(d,keepDay){
+  d=normalizeBranchEquipment(normalizeLegacySnapshotDay(d));
   freshState(); Object.assign(S,{day:d.day,coins:d.coins,own:d.own||{},capBonus:d.capBonus||0,lookupCost:d.lookupCost||0.8,shelfCap:d.shelfCap||8,record:d.record||0,code:d.code,moved:d.moved||{},goodCode:d.goodCode||d.code,archive:d.archive||[],lost:d.lost||0,delivered:d.delivered||0,notes:dedupNotes(d.notes),snap:d.snap||null,spent:d.spent||0,attempts:d.attempts||{},lastReport:d.lastReport||null,finished6:!!d.finished6,lessonState:d.lessonState||(d.own&&d.own.robot1?"legacy":null),lessonDraft:d.lessonDraft||null,lessonVerified:d.lessonVerified||null,cityCode:d.cityCode||null,nightMarks:validNightMarks(d.nightMarks)?{v:1,earned:d.nightMarks.earned.slice()}:null});
   applyMoved();
   if(S.own.shards){S.queues=[[],[],[]];S.locks=[0,0,0];}

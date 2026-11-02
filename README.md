@@ -11,6 +11,10 @@
 - Сортировка — двумя отдельными нажатиями: письмо, затем ящик с той же меткой. Перетаскивать не нужно.
 - В первой смене нет штрафов за потерянные письма; каждая доставка приносит 1 монету. Штрафы за потери начинаются со второй смены.
 
+Открыли страницу с телефона? Кнопка **«Скопировать ссылку для компьютера»** помогает открыть демо на компьютере. Она копирует только публичную ссылку; сохранение остаётся в исходном браузере. Если автоматическое копирование недоступно, игра покажет адрес для ручного копирования.
+
+В заключительном задании филиал получает своё стартовое оборудование. Улучшения филиала можно купить отдельно. Старые сохранения корректно определяют уже купленные улучшения по фактическому оборудованию.
+
 ## Первый игровой тест: 10–15 минут
 
 Начните первую смену, попробуйте разобраться в сортировке и добраться до первого робота. Проходить всё демо необязательно. Если вы застряли или захотели остановиться, это тоже полезное наблюдение.
@@ -38,6 +42,10 @@ Mail Must Flow is a game about automating a small post office. Sort letters by h
 
 Progress is saved **at the end of each shift**, locally in the current browser. Use the same browser to continue.
 
+Opened the page on a phone? Use **Copy link for a computer** to open the demo on a computer. It copies only the public link; progress stays in the original browser. If automatic copying is unavailable, the game shows the address for manual copying.
+
+The final branch task has its own starting equipment. Branch upgrades can be bought separately. Existing branch saves correctly recognize purchased upgrades from their actual equipment.
+
 Manual sorting uses two separate clicks: envelope, then the bin with the same mark. No dragging is needed. Shift 1 has no fines for lost letters; each delivery still earns 1 coin. Loss fines begin in shift 2.
 
 For a first playtest, try 10–15 minutes. Tell us how far you got, where you first felt unsure, and whether you wanted to keep playing. Finishing the demo is optional.
@@ -48,6 +56,6 @@ In shift 1, the tray upgrade unlocks after your first robot, so you can save the
 
 ## О сборке / Build
 
-- Version: `v15.5.1-public-demo5`.
+- Version: `v15.5.1-public-demo6`.
 - The game is contained in `index.html`; no external assets or build step are required. `.nojekyll` keeps GitHub Pages from applying Jekyll processing.
 - Код создавался и редактировался с помощью ИИ. / The code was created and edited with AI assistance.
