@@ -15,6 +15,8 @@
 
 В заключительном задании филиал получает своё стартовое оборудование. Улучшения филиала можно купить отдельно. Старые сохранения корректно определяют уже купленные улучшения по фактическому оборудованию.
 
+Если программа робота закончилась без повторяющегося цикла, смена останавливается на паузу. Ошибка указывает на робота и последнюю строку; удерживаемое письмо возвращается в свой лоток. Исправьте программу и нажмите «Запустить код» или верните рабочий код.
+
 ## Первый игровой тест: 10–15 минут
 
 Начните первую смену, попробуйте разобраться в сортировке и добраться до первого робота. Проходить всё демо необязательно. Если вы застряли или захотели остановиться, это тоже полезное наблюдение.
@@ -46,6 +48,8 @@ Opened the page on a phone? Use **Copy link for a computer** to open the demo on
 
 The final branch task has its own starting equipment. Branch upgrades can be bought separately. Existing branch saves correctly recognize purchased upgrades from their actual equipment.
 
+If a robot program ends without a repeating loop, the shift pauses. The error selects the robot and its last line; a held letter returns to its tray. Fix the program and choose Run code, or restore the working code.
+
 Manual sorting uses two separate clicks: envelope, then the bin with the same mark. No dragging is needed. Shift 1 has no fines for lost letters; each delivery still earns 1 coin. Loss fines begin in shift 2.
 
 For a first playtest, try 10–15 minutes. Tell us how far you got, where you first felt unsure, and whether you wanted to keep playing. Finishing the demo is optional.
@@ -56,6 +60,6 @@ In shift 1, the tray upgrade unlocks after your first robot, so you can save the
 
 ## О сборке / Build
 
-- Version: `v15.5.1-public-demo6`.
+- Version: `v15.5.1-public-demo7`.
 - The game is contained in `index.html`; no external assets or build step are required. `.nojekyll` keeps GitHub Pages from applying Jekyll processing.
 - Код создавался и редактировался с помощью ИИ. / The code was created and edited with AI assistance.

@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="app-build" content="v15.5.1-public-demo6">
+<meta name="app-build" content="v15.5.1-public-demo7">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Почта не спит</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -1268,7 +1268,8 @@ function stepRobot(R,dt){
       R.err=trErr(R.errRu);
       if(R.carry){returnToQueue(R.carry);R.carry=null;} R.label="ошибка"; S.selRobot=R.id; pauseGame("error"); return;
     }
-    if(r.done){ R.errRu="Программа закончилась. Оберни её в while True: — тогда робот будет повторять"; R.err=trErr(R.errRu); R.label="стоит"; return; }
+    if(r.done){ R.errRu="Программа закончилась. Оберни её в while True: — тогда робот будет повторять"; R.err=trErr(R.errRu); R.errLine=R.env.line||null;
+      if(R.carry){returnToQueue(R.carry);R.carry=null;} R.label="стоит"; S.selRobot=R.id; pauseGame("error"); return; }
     const v=r.value; if(typeof v==="number")R.sleep+=v; else if(v&&v.wait!==undefined){ R.block=v.wait; }
   }
 }
